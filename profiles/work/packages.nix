@@ -1,0 +1,21 @@
+let
+  common = import ../common.nix;
+  packages = common.packages;
+in {
+  system = { pkgs, pkgs-stable }:
+    [
+
+    ] ++ packages.system {
+      pkgs = pkgs;
+      pkgs-stable = pkgs-stable;
+    };
+
+  home = { pkgs, pkgs-stable, extra }:
+    [
+
+    ] ++ packages.home {
+      pkgs = pkgs;
+      pkgs-stable = pkgs-stable;
+    };
+}
+
