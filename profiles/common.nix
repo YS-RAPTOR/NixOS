@@ -1,0 +1,71 @@
+{
+  packages = {
+    system =
+      { pkgs, pkgs-stable }:
+      [
+        # Essentials
+        pkgs.vscode
+        pkgs.neovim
+        pkgs.firefox
+        pkgs.vivaldi
+        pkgs.wofi
+        pkgs.ghostty
+        pkgs.git
+        pkgs.fish
+        pkgs.bash
+        pkgs.nautilus
+
+        # WM
+        pkgs.brightnessctl
+        pkgs.playerctl
+        pkgs.udiskie
+        pkgs.pkg-config
+        pkgs.waybar
+        pkgs.hyprshot
+        pkgs.hyprpaper
+        pkgs.hyprpicker
+        pkgs.hypridle
+        pkgs.hyprlock
+        pkgs.dunst
+        pkgs.cliphist
+
+        # Programming Languages
+        pkgs.gcc
+        pkgs.zig
+        pkgs.cargo
+        pkgs.rustc
+        pkgs.rust-analyzer
+        pkgs.go
+        pkgs.dotnet-sdk
+        pkgs.bun
+        pkgs.nodejs
+        pkgs.uv
+      ];
+
+    home =
+      { pkgs, pkgs-stable }:
+      [
+        pkgs.yazi
+        pkgs.tmux
+        pkgs.bat
+        pkgs.fzf
+        pkgs.ripgrep
+        pkgs.eza
+        pkgs.fd
+        pkgs.unzip
+        pkgs.lazygit
+        pkgs.zoxide
+        pkgs.direnv
+        pkgs.oh-my-posh
+        pkgs.wget
+        pkgs.jq
+        pkgs.wl-clipboard
+        pkgs.networkmanager_dmenu
+        pkgs.btop
+        pkgs.pavucontrol
+        pkgs.freeoffice
+        pkgs.opencode
+        pkgs.gh
+      ];
+  };
+}

@@ -1,0 +1,177 @@
+/* Adding padding and border around content */
+
+#browser:not(.fullscreen) #webpage-stack {
+    border-radius: 5px !important;
+}
+
+#browser:not(.fullscreen) #webview-container {
+    padding: 14px;
+    background-color: var(--colorTabBar, black);
+}
+
+/* Popups Broken */
+
+#tabs-container>.toolbar .UrlBar-AddressField .button-popup-center {
+    right: var(--edgeMargin) !important;
+    left: unset;
+}
+
+#tabs-container>.toolbar .UrlBar-AddressField .button-popup-center::before {
+    right: calc((var(--buttonWidth) / 2) - 6px - var(--edgeMargin));
+    left: unset;
+}
+
+/* Tiltlebar styling */
+
+#header {
+    position: absolute;
+    right: 0px;
+    width: 80vw;
+    z-index: 3;
+    height: 12px;
+    min-height: 10px !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+#titlebar * {
+    display: none !important;
+}
+
+#titlebar .window-buttongroup {
+    display: flex !important;
+    gap: 1.5px;
+    top: 0px !important;
+}
+
+#titlebar .window-buttongroup button {
+    display: inline-block !important;
+    height: 12px !important;
+    width: 50px !important;
+    margin: 0px !important;
+}
+
+#titlebar .window-buttongroup .window-minimize {
+    background-color: #3b82f6 !important;
+}
+
+#titlebar .window-buttongroup .window-maximize {
+    background-color: #10b981 !important;
+}
+
+#titlebar .window-buttongroup .window-close {
+    background-color: #ef4444 !important;
+    padding: 1px 6px !important;
+}
+
+#titlebar .window-buttongroup .window-minimize:hover {
+    background-color: #60a5fa !important;
+}
+
+#titlebar .window-buttongroup .window-maximize:hover {
+    background-color: #34d399 !important;
+}
+
+#titlebar .window-buttongroup .window-close:hover {
+    background-color: #f87171 !important;
+}
+
+/* Sidebar General Styling */
+
+#main>.inner>.tabbar-wrapper {
+    width: 14px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    transition: width 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    /* snappy curve */
+    overflow: hidden;
+    padding-left: 14px;
+    background-color: var(--colorTabBar, black);
+}
+
+#tabs-tabbar-container {
+    width: 100% !important;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#main>.inner>.tabbar-wrapper:is( :hover,
+    :has(:hover),
+    :has(:active),
+    :focus-within,
+    :has([aria-expanded="true"])) {
+    width: 500px;
+}
+
+#main>.inner>.tabbar-wrapper:is( :hover,
+    :has(:hover),
+    :has(:active),
+    :focus-within,
+    :has([aria-expanded="true"])) #tabs-tabbar-container {
+    opacity: 1;
+}
+
+#browser:has(.extension-popup, .tooltip-item) #main>.inner>.tabbar-wrapper {
+    width: 500px;
+}
+
+#browser:has(.extension-popup, .tooltip-item) #main>.inner>.tabbar-wrapper #tabs-tabbar-container {
+    opacity: 1;
+}
+
+/* Sidebar Top Styling */
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) svg {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) img:is(.button-icon) {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) .ToolbarButton-Button {
+    min-width: 24px !important;
+    height: 24px !important;
+}
+
+#tabs-container .tabbar-workspace-button .button-toolbar-menu-indicator svg {
+    transform: rotate(180deg);
+    transform-origin: center;
+}
+
+/* Sidebar Address Bar Styling */
+
+#tabs-container .UrlBar-AddressField {
+    margin: 6px 0px !important;
+    height: 50px !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 5px !important;
+}
+
+#tabs-container .UrlBar-AddressField input {
+    padding: 4px !important;
+}
+
+#tabs-container .UrlBar-AddressField .OmniDropdown {
+    padding-top: 50px !important;
+}
+
+/* Active Tab */
+
+#tabs-container>.resize .tab:is(.active) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Panel */
+
+#panels-container {
+    width: 0px !important;
+}
+
+#panels-container .panel-group {
+    right: 0px !important;
+}
