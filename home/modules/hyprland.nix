@@ -84,9 +84,13 @@ in {
           passes = 2;
           vibrancy = 0.1696;
         };
-        layerrule = "blur,waybar";
-        blurls = "waybar";
       };
+      layerrule = {
+        name = "waybar-blur";
+        blur = "on";
+        "match:namespace" = "waybar";
+      };
+      blurls = "waybar";
 
       animations = {
         enabled = "yes";
@@ -122,12 +126,36 @@ in {
         "workspace = f[1], gapsout:0, gapsin:0"
       ];
 
-      windowrulev2 = [
-        "bordersize 0, floating:0, onworkspace:w[tv1]"
-        "rounding 0, floating:0, onworkspace:w[tv1]"
-        "bordersize 0, floating:0, onworkspace:f[1]"
-        "rounding 0, floating:0, onworkspace:f[1]"
-        "workspace 6, class:^(vesktop)$"
+      windowrule = [
+        {
+          name = "suppress-maximize";
+          suppress_event = "maximize";
+          "match:class" = ".*";
+        }
+        {
+          name = "xwayland-ghosts";
+          no_focus = "on";
+          "match:class" = "^$";
+          "match:title" = "^$";
+          "match:xwayland" = 1;
+          "match:float" = 1;
+          "match:fullscreen" = 0;
+          "match:pin" = 0;
+        }
+        {
+          name = "when-one-tiling-window";
+          border_size = 0;
+          rounding = 0;
+          "match:float" = 0;
+          "match:workspace" = "w[tv1]";
+        }
+        {
+          name = "when-one-fullscreen-window";
+          border_size = 0;
+          rounding = 0;
+          "match:float" = 0;
+          "match:workspace" = "f[1]";
+        }
       ];
 
       dwindle = {
@@ -142,9 +170,7 @@ in {
         disable_hyprland_logo = false;
       };
 
-      xwayland = {
-        force_zero_scaling = true;
-      };
+      xwayland = { force_zero_scaling = true; };
 
       input = {
         kb_layout = "us";
@@ -271,12 +297,6 @@ in {
         "$mainMod, mouse:272, movewindow"
         "$mainMod, mouse:273, resizewindow"
       ];
-
-      windowrule = [
-        "suppressevent maximize, class:.*"
-        "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
-      ];
-
     };
   };
 }
