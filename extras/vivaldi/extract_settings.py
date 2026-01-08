@@ -28,6 +28,9 @@ WHITELIST_PATHS = {
     "browser.window_placement",
     # Extension keyboard shortcuts (not extension data)
     "extensions.commands",
+    # Search engine settings (nicknames/keywords, custom engines, default selection)
+    "default_search_provider",
+    "default_search_provider_data",
 }
 
 # Vivaldi-specific settings to extract (under "vivaldi" key)
@@ -54,16 +57,13 @@ VIVALDI_WHITELIST = {
     "rocker_gestures",
     "chained_commands",  # Command chains (filtered by COMMAND_CHAIN_FILTER)
     # Features settings
-    "bookmarks",
     "calendar",
     "contacts",
     "downloads",
     "history",
     "mail",
     "notes",
-    "rss",
     "translate",
-    "reading_list",
     # Browser behavior
     "homepage",
     "incognito",
