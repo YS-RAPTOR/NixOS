@@ -26,6 +26,10 @@
     libinput.enable = true;
   };
 
+  virtualisation.docker = {
+    enable = true;
+  };
+
   # User setup
   users.users.${settings.user.username} = {
     isNormalUser = true;
@@ -33,6 +37,7 @@
     extraGroups = [
       "networkmanager"
       "wheel"
+      "docker"
     ];
     shell = pkgs.fish;
     packages = settings.packages.home {

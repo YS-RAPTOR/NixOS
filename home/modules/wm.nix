@@ -1,14 +1,8 @@
-{
-  settings,
-  lib,
-  config,
-  ...
-}:
+{ settings, lib, config, ... }:
 let
   font = "monospace";
   brightness = import ../../lib/brightness.nix { inherit settings; };
-in
-{
+in {
   services = {
     hyprpaper = {
       enable = true;
@@ -16,13 +10,11 @@ in
         ipc = "on";
         splash = false;
         splash_offset = 2;
-        wallpaper = [
-          {
-            monitor = "";
-            path = "${settings.user.extraDir}/Code Wallpaper.png";
-            fit_mode = "cover";
-          }
-        ];
+        wallpaper = [{
+          monitor = "";
+          path = "${settings.user.wallpaper}";
+          fit_mode = "cover";
+        }];
       };
     };
 
@@ -42,8 +34,10 @@ in
           }
           {
             timeout = 60;
-            on-timeout = "brightnessctl -sd ${settings.hardware.keyboard.backlight.device} set 0";
-            on-resume = "brightnessctl -rd ${settings.hardware.keyboard.backlight.device}";
+            on-timeout =
+              "brightnessctl -sd ${settings.hardware.keyboard.backlight.device} set 0";
+            on-resume =
+              "brightnessctl -rd ${settings.hardware.keyboard.backlight.device}";
           }
           {
             timeout = 120;
@@ -66,9 +60,7 @@ in
   programs.hyprlock = {
     enable = true;
     settings = {
-      general = {
-        hide_cursor = false;
-      };
+      general = { hide_cursor = false; };
       animations = {
         enabled = true;
         bezier = "linear, 1, 1, 0, 0";

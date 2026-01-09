@@ -19,6 +19,7 @@
     homeDir = "/home/${username}";
     nixDir = "${homeDir}/NixOS";
     extraDir = "${nixDir}/extras";
+    wallpaper = "${extraDir}/Work Wallpaper.jpg";
   };
 
   packages = import ./packages.nix;
@@ -26,7 +27,8 @@
   hardware = {
     configFile = ./hardware-configuration.nix;
     gpu = { type = "intel"; };
-    monitors = [ ",preferred,auto,1" ];
+    monitors =
+      [ "eDP-1,1920x1200@60,960x0,1" "DP-1,1920x1080@74.99Hz,0x-1080,1" ];
     backlights = [ "intel_backlight" ];
     keyboard = {
       backlight = {

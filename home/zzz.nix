@@ -1,10 +1,4 @@
-{
-  config,
-  pkgs,
-  pkgs-stable,
-  settings,
-  ...
-}:
+{ config, pkgs, pkgs-stable, settings, ... }:
 
 {
   imports = [ ./modules/zzz.nix ];
@@ -14,7 +8,8 @@
   home.homeDirectory = settings.user.homeDir;
 
   # NeoVim setup
-  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/nvim";
+  xdg.configFile."nvim".source =
+    config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/nvim";
   xdg.configFile."dictionary".source =
     config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/dictionary";
 
@@ -25,6 +20,8 @@
     PAGER = "bat --paging=always";
     MANPAGER = "bat --paging=always";
     BROWSER = "vivaldi";
+    # FIXME: Slack opening firefox rather than default browser
+    DEFAULT_BROWSER = "vivaldi";
     XDG_DESKTOP_DIR = "$HOME/Desktop";
     XDG_DOWNLOAD_DIR = "$HOME/Downloads";
     XDG_DOCUMENTS_DIR = "$HOME/Documents";

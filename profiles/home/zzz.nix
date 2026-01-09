@@ -19,6 +19,7 @@
     homeDir = "/home/${username}";
     nixDir = "${homeDir}/NixOS";
     extraDir = "${nixDir}/extras";
+    wallpaper = "${extraDir}/Home Wallpaper.png";
   };
 
   packages = import ./packages.nix;
@@ -34,10 +35,7 @@
       };
     };
     monitors = [ "eDP-1,3200x2000@120.00Hz,auto,1.6" ];
-    backlights = [
-      "intel_backlight"
-      "nvidia_0"
-    ];
+    backlights = [ "intel_backlight" "nvidia_0" ];
     keyboard = {
       backlight = {
         device = "platform::kbd_backlight";

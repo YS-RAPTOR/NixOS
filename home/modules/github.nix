@@ -13,6 +13,5 @@
         };
       };
     };
-    # TODO: Copy some of the configs from my work machine
   };
 }

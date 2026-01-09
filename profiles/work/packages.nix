@@ -14,6 +14,7 @@ in {
     [
       pkgs.slack
       pkgs.teams-for-linux
+      pkgs.tilt
 
     ] ++ packages.home {
       pkgs = pkgs;
