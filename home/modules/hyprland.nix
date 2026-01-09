@@ -28,6 +28,13 @@ let
     ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
   '';
 
+  monitorWorkspaceRules = monitors:
+    let toRule = m: w: "name:${toString w}, monitor:${m.name}, default:true";
+    in lib.flatten (map (m: map (w: toRule m w) m.workspaces) monitors);
+
+  formatMonitor = m:
+    "${m.name},${m.resolution}@${m.refreshRate},${m.position},${m.scale}";
+
 in {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -36,7 +43,7 @@ in {
 
     settings = {
       env = [ "XDG_CURRENT_DESKTOP,Hyprland" ];
-      monitor = settings.hardware.monitors;
+      monitor = map formatMonitor settings.wm.monitors;
       # exec-once = [
       #   TODO: Setup workspace rules.
       #   "vesktop &"
@@ -124,10 +131,9 @@ in {
           "workspacesOut, 1, 1.94, almostLinear, fade"
         ];
       };
-      workspace = [
-        "w[tv1], gapsout:0, gapsin:0"
-        "workspace = f[1], gapsout:0, gapsin:0"
-      ];
+
+      workspace = [ "w[tv1], gapsout:0, gapsin:0" "f[1], gapsout:0, gapsin:0" ]
+        ++ (monitorWorkspaceRules settings.wm.monitors);
 
       windowrule = [
         {

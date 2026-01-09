@@ -23,12 +23,31 @@
   };
 
   packages = import ./packages.nix;
+  wm = {
+    dunst.monitorId = 1;
+    monitors = [
+      {
+        name = "eDP-1";
+        resolution = "1920x1200";
+        refreshRate = "60.00Hz";
+        position = "960x0";
+        scale = "1";
+        workspaces = [ 1 2 3 4 5 ];
+      }
+      {
+        name = "DP-1";
+        resolution = "1920x1080";
+        refreshRate = "74.99Hz";
+        position = "0x-1080";
+        scale = "1";
+        workspaces = [ 6 7 8 9 10 ];
+      }
+    ];
+  };
 
   hardware = {
     configFile = ./hardware-configuration.nix;
     gpu = { type = "intel"; };
-    monitors =
-      [ "eDP-1,1920x1200@60,960x0,1" "DP-1,1920x1080@74.99Hz,0x-1080,1" ];
     backlights = [ "intel_backlight" ];
     keyboard = {
       backlight = {

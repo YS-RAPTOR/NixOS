@@ -20,7 +20,6 @@
     PAGER = "bat --paging=always";
     MANPAGER = "bat --paging=always";
     BROWSER = "vivaldi";
-    # FIXME: Slack opening firefox rather than default browser
     DEFAULT_BROWSER = "vivaldi";
     XDG_DESKTOP_DIR = "$HOME/Desktop";
     XDG_DOWNLOAD_DIR = "$HOME/Downloads";
@@ -31,7 +30,20 @@
     XDG_PUBLICSHARE_DIR = "$HOME/Public";
   };
 
+  xdg = {
+    mimeApps = {
+      enable = true;
+      defaultApplications = {
+        "text/html" = "vivaldi-stable.desktop";
+        "x-scheme-handler/http" = "vivaldi-stable.desktop";
+        "x-scheme-handler/https" = "vivaldi-stable.desktop";
+        "x-scheme-handler/about" = "vivaldi-stable.desktop";
+        "x-scheme-handler/unknown" = "vivaldi-stable.desktop";
+      };
+    };
+    portal.config.common.default = "*";
+  };
+
   stylix.targets.waybar.enable = false;
   home.stateVersion = "25.05";
-  xdg.portal.config.common.default = "*";
 }

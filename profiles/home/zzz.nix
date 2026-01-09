@@ -24,6 +24,18 @@
 
   packages = import ./packages.nix;
 
+  wm = {
+    dunst.monitorId = 0;
+    monitors = [{
+      name = "eDP-1";
+      resolution = "3200x2000";
+      refreshRate = "120.00Hz";
+      position = "auto";
+      scale = "1.6";
+      workspaces = [ 1 2 3 4 5 6 7 8 9 10 ];
+    }];
+  };
+
   hardware = {
     configFile = ./hardware-configuration.nix;
     gpu = {
@@ -34,7 +46,6 @@
         nvidiaBusId = "PCI:1:0:0";
       };
     };
-    monitors = [ "eDP-1,3200x2000@120.00Hz,auto,1.6" ];
     backlights = [ "intel_backlight" "nvidia_0" ];
     keyboard = {
       backlight = {
