@@ -1,16 +1,12 @@
-{ ... }:
-{
+{ settings, ... }: {
   programs.opencode = {
     enable = true;
     settings = {
       theme = "stylix";
       autoupdate = true;
-      disabled_providers = [
-        "amazon-bedrock"
-        "github-models"
-      ];
-      model = "github-copilot/claude-opus-4.5";
-      small_model = "github-copilot/gpt-5-mini";
+      disabled_providers = [ "amazon-bedrock" "github-models" ];
+      model = settings.ai.default;
+      small_model = settings.ai.defaultSmall;
       permission = {
         bash = {
           "git status" = "allow";

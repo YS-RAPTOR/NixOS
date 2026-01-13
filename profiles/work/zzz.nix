@@ -23,6 +23,12 @@
   };
 
   packages = import ./packages.nix;
+
+  ai = {
+    default = "anthropic/claude-opus-4-5";
+    defaultSmall = "anthropic/claude-haiku-4-5";
+  };
+
   wm = {
     dunst.monitorId = 1;
     monitors = [

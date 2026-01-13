@@ -10,6 +10,8 @@
   # NeoVim setup
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/nvim";
+  # xdg.configFile."opencode".source =
+  #   config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/opencode";
   xdg.configFile."dictionary".source =
     config.lib.file.mkOutOfStoreSymlink "${settings.user.extraDir}/dictionary";
 

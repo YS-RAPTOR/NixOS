@@ -24,6 +24,11 @@
 
   packages = import ./packages.nix;
 
+  ai = {
+    default = "github-copilot/claude-opus-4.5";
+    defaultSmall = "github-copilot/gpt-5-mini";
+  };
+
   wm = {
     dunst.monitorId = 0;
     monitors = [{
