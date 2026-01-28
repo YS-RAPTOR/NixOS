@@ -15,9 +15,9 @@
     stylix-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
 
     affinity-nix.url = "path:./local-flakes/affinity-nix";
+    wombat.url = "path:./local-flakes/wombat";
   };
-  outputs =
-    inputs@{ self, affinity-nix, ... }:
+  outputs = inputs@{ self, affinity-nix, wombat, ... }:
     let
       profile = "home";
       settings = import ./profiles/${profile}/zzz.nix;
@@ -45,9 +45,9 @@
 
       extra = {
         affinity = affinity-nix.packages.${settings.system.target}.v3;
+        wombat = wombat.packages.${settings.system.target}.wombat;
       };
-    in
-    {
+    in {
       nixosConfigurations = {
         ${settings.system.hostname} = lib.nixosSystem {
           system = settings.system.target;

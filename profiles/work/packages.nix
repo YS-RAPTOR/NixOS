@@ -15,6 +15,7 @@ in {
       pkgs.slack
       pkgs.teams-for-linux
       pkgs.tilt
+      extra.wombat
 
     ] ++ packages.home {
       pkgs = pkgs;
