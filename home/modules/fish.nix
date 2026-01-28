@@ -1,13 +1,10 @@
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   programs.fish = {
     enable = true;
-    plugins = [
-      {
-        name = "fzf-fish";
-        src = pkgs.fishPlugins.fzf-fish.src;
-      }
-    ];
+    plugins = [{
+      name = "fzf-fish";
+      src = pkgs.fishPlugins.fzf-fish.src;
+    }];
     shellInit = ''
       set fish_cursor_default block
       set fish_cursor_insert line
@@ -22,6 +19,7 @@
       tree = "eza --tree --icons";
       cat = "bat --paging=never";
       less = "bat --paging=always";
+      opencode = "GITHUB_TOKEN='' opencode";
     };
     functions = {
       _bind_bang = ''
