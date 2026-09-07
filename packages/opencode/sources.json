@@ -1,9 +1,9 @@
 {
     "platforms": {
         "x86_64-linux": {
-            "version": "1.18.25",
-            "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.25/opencode-linux-x64.tar.gz",
-            "hash": "sha256-WKNymm80Mt1tKRf8xKlJeIiRoDWBhkatSA4SyUf1bng="
+            "version": "1.18.29",
+            "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.29/opencode-linux-x64.tar.gz",
+            "hash": "sha256-6oALf/ViJrcJUhJsn8HiUXykxLVoL9nT+eh0SWl6EZQ="
         }
     }
 }

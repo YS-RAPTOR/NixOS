@@ -26,10 +26,13 @@
               lastChangelogVersion = self'.packages.pi.version;
               theme = "stylix";
               defaultProvider = "openai-codex";
-              defaultModel = "gpt-5.6-sol";
+              defaultModel = "gpt-6-astra";
               defaultThinkingLevel = "high";
               editorPaddingX = 1;
-              enabledModels = [ "openai-codex/gpt-5.6-*" ];
+              enabledModels = [
+                "openai-codex/gpt-5.6-*"
+                "openai-codex/gpt-6-*"
+              ];
               hideThinkingBlock = false;
               showCacheMissNotices = true;
               images = {
