@@ -38,6 +38,7 @@
     den.aspects.development.tools.navigation.zoxide
     den.aspects.development.tools.direnv
     den.aspects.development.version-control.git
+    den.aspects.development.review.hunk
     den.aspects.development.tools.docs
     den.aspects.development.toolchains.c-cpp
     den.aspects.development.toolchains.dotnet
