@@ -15,7 +15,10 @@
           colors = config.lib.stylix.colors.withHashtag;
         in
         {
-          home.packages = [ self'.packages.agent-browser ];
+          home.packages = [
+            self'.packages.agent-browser
+            pkgs.tmux
+          ];
 
           programs.pi-coding-agent = {
             enable = true;
