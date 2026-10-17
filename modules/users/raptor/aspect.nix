@@ -14,7 +14,6 @@
     den.aspects.services.storage.removable-media
     den.aspects.services.networking.openvpn
     den.aspects.development.computer-use.cua-driver
-    den.aspects.development.computer-use.agent-desktop
     den.aspects.appearance.theme.stylix
     den.aspects.desktop.compositor.hyprland
     den.aspects.appearance.wallpaper.hyprpaper
@@ -41,7 +40,6 @@
     den.aspects.development.tools.navigation.zoxide
     den.aspects.development.tools.direnv
     den.aspects.development.version-control.git
-    den.aspects.development.review.hunk
     den.aspects.development.tools.docs
     den.aspects.development.toolchains.c-cpp
     den.aspects.development.toolchains.dotnet
@@ -55,7 +53,6 @@
     den.aspects.development.agents.claude-code
     den.aspects.development.agents.codex
     den.aspects.development.agents.opencode.desktop
-    (den.batteries.development.agents.pi { source = "local"; })
     den.aspects.development.agents.t3-code
     den.aspects.development.agents.opencode
     den.aspects.operations.raptor-cli

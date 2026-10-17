@@ -2,12 +2,12 @@
   den.batteries.programs.file-manager.defaults = {
     nautilus = {
       includes = [ den.aspects.programs.file-manager.nautilus ];
-      homeManager.desktop.commands.fileManager = "nautilus";
+      homeManager.desktop.commands.fileManager.command = "nautilus";
     };
 
     yazi = {
       includes = [ den.aspects.programs.file-manager.yazi ];
-      homeManager.desktop.commands.fileManager = "yazi";
+      homeManager.desktop.commands.fileManager.command = "yazi";
     };
   };
 }

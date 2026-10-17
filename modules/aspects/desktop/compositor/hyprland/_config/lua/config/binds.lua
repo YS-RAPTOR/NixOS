@@ -1,11 +1,8 @@
 local monitors = require("config.monitors")
 local runtime = require("runtime")
+local launch = require("lib.launch")
 
 local main = "SUPER"
-
-local function open_terminal()
-    hl.exec_cmd(runtime.terminal)
-end
 
 local function scroll_or_default(scroll_dispatcher, default_dispatcher)
     local workspace = hl.get_active_workspace()
@@ -52,11 +49,12 @@ local function bind_workspace_group(monitor_index, modifier)
 end
 
 hl.bind(main .. " + W", hl.dsp.window.close())
-hl.bind(main .. " + Q", open_terminal)
-hl.bind(main .. " + E", hl.dsp.exec_cmd(runtime.file_manager))
-hl.bind(main .. " + R", hl.dsp.exec_cmd(runtime.launcher))
-hl.bind(main .. " + D", hl.dsp.exec_cmd(runtime.browser))
-hl.bind(main .. " + SHIFT + D", hl.dsp.exec_cmd(runtime.private_browser))
+hl.bind(main .. " + Q", launch(runtime.terminal))
+hl.bind(main .. " + grave", launch(runtime.orchestrator))
+hl.bind(main .. " + E", launch(runtime.file_manager))
+hl.bind(main .. " + R", launch(runtime.launcher))
+hl.bind(main .. " + D", launch(runtime.browser))
+hl.bind(main .. " + SHIFT + D", launch(runtime.private_browser))
 
 hl.bind(main .. " + SHIFT + P", hl.dsp.window.pseudo())
 hl.bind(main .. " + SHIFT + A", hl.dsp.layout("togglesplit"))

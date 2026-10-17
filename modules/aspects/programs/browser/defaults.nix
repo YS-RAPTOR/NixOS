@@ -15,8 +15,8 @@
           };
         };
         desktop.commands = {
-          browser = "firefox";
-          privateBrowser = "firefox --private-window";
+          browser.command = "firefox";
+          privateBrowser.command = "firefox --private-window";
         };
       };
     };
@@ -36,8 +36,8 @@
           };
         };
         desktop.commands = {
-          browser = "vivaldi";
-          privateBrowser = "vivaldi -incognito";
+          browser.command = "vivaldi";
+          privateBrowser.command = "vivaldi -incognito";
         };
       };
     };

@@ -11,7 +11,7 @@ let
     sources.platforms.${stdenv.hostPlatform.system}
       or (throw "opencode-desktop: unsupported system ${stdenv.hostPlatform.system}");
   src = fetchurl { inherit (source) url hash; };
-  appimageContents = appimageTools.extractType2 {
+  appimageContents = appimageTools.extract {
     pname = "opencode-desktop";
     inherit (source) version;
     inherit src;

@@ -12,7 +12,7 @@
         pkgs.prettier
         pkgs.ripgrep
         pkgs.shader-slang
-        pkgs.typescript-go
+        pkgs.typescript
         pkgs.wl-clipboard
         pkgs.zls
       ];

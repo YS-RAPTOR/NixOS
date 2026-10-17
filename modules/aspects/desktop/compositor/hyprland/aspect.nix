@@ -41,16 +41,19 @@
           '';
 
           runtime = pkgs.writeTextDir "lua/runtime.lua" ''
-            return {
-                browser = ${builtins.toJSON config.desktop.commands.browser},
-                file_manager = ${builtins.toJSON config.desktop.commands.fileManager},
-                hyprshot = ${builtins.toJSON (lib.getExe pkgs.hyprshot)},
-                keyboard_layout = ${builtins.toJSON host.keyboardLayout},
-                launcher = ${builtins.toJSON config.desktop.commands.launcher},
-                playerctl = ${builtins.toJSON (lib.getExe pkgs.playerctl)},
-                private_browser = ${builtins.toJSON config.desktop.commands.privateBrowser},
-                terminal = ${builtins.toJSON (lib.getExe config.programs.ghostty.package)},
-                wpctl = ${builtins.toJSON (lib.getExe' pkgs.wireplumber "wpctl")},
+            return ${
+              lib.generators.toLua { } {
+                browser = config.desktop.commands.browser;
+                file_manager = config.desktop.commands.fileManager;
+                hyprshot = lib.getExe pkgs.hyprshot;
+                keyboard_layout = host.keyboardLayout;
+                launcher = config.desktop.commands.launcher;
+                orchestrator = config.desktop.commands.orchestrator;
+                playerctl = lib.getExe pkgs.playerctl;
+                private_browser = config.desktop.commands.privateBrowser;
+                terminal = config.desktop.commands.terminal;
+                wpctl = lib.getExe' pkgs.wireplumber "wpctl";
+              }
             }
           '';
 
@@ -64,30 +67,10 @@
           '';
         in
         {
-          assertions =
-            map
-              (command: {
-                assertion = command.value != null;
-                message = "A default ${command.name} must be selected for Hyprland.";
-              })
-              [
-                {
-                  name = "browser";
-                  value = config.desktop.commands.browser;
-                }
-                {
-                  name = "private browser";
-                  value = config.desktop.commands.privateBrowser;
-                }
-                {
-                  name = "file manager";
-                  value = config.desktop.commands.fileManager;
-                }
-                {
-                  name = "launcher";
-                  value = config.desktop.commands.launcher;
-                }
-              ];
+          assertions = lib.mapAttrsToList (name: target: {
+            assertion = target != null;
+            message = "A default ${name} must be selected for Hyprland.";
+          }) config.desktop.commands;
 
           xdg.portal.config.common.default = "*";
 

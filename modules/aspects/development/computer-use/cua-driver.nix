@@ -14,7 +14,6 @@
       };
 
       environment = {
-        systemPackages = [ inputs.cua.packages.${system}.cua-compositor ];
         variables = {
           CUA_DRIVER_RS_ENABLE_WAYLAND = "1";
           CUA_DRIVER_RS_TELEMETRY_ENABLED = "false";
