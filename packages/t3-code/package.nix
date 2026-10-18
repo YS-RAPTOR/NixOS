@@ -3,6 +3,7 @@
   asar,
   fetchurl,
   lib,
+  libnotify,
   makeWrapper,
   nodejs,
   stdenv,
@@ -18,7 +19,9 @@ let
     inherit (source) version;
     inherit src;
     postExtract = ''
-      ${lib.getExe nodejs} ${./patch-codex-cwd.mjs} \
+      # AppRun puts usr/lib on LD_LIBRARY_PATH for everything T3 starts, shadowing their Nix libraries.
+      rm -r "$out/usr/lib"
+      ${lib.getExe nodejs} ${./patch-asar.mjs} \
           ${asar}/lib/node_modules/@electron/asar "$out/resources"
     '';
   };
@@ -28,6 +31,8 @@ appimageTools.wrapAppImage {
   inherit (source) version;
   inherit src;
   contents = appimageContents;
+  # Electron dlopens libnotify for notifications, which usr/lib used to provide.
+  extraPkgs = _: [ libnotify ];
   nativeBuildInputs = [ makeWrapper ];
 
   extraInstallCommands = ''
