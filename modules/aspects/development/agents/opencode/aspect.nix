@@ -5,9 +5,16 @@
       name = "opencode(${user.userName})";
 
       homeManager = { lib, self', ... }: {
-        xdg.configFile."opencode/opencode-notifier.json".text = builtins.toJSON {
-          sound = false;
-          notification = true;
+        xdg.configFile = {
+          "opencode/AGENTS.md".source = ../_files/AGENTS.md;
+          "opencode/opencode-notifier.json".text = builtins.toJSON {
+            sound = false;
+            notification = true;
+          };
+        }
+        // import ../_lib/skill-links.nix {
+          inherit lib;
+          destination = "opencode/skills";
         };
 
         programs.opencode = {
