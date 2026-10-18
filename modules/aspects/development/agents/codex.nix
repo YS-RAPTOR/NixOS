@@ -1,10 +1,9 @@
-{
+{ inputs, ... }: {
   den.aspects.development.agents.codex.homeManager =
     {
       config,
       lib,
       pkgs,
-      self',
       ...
     }:
     {
@@ -26,7 +25,7 @@
             --env CUA_DRIVER_RS_ENABLE_WAYLAND=1 \
             --env CUA_DRIVER_RS_TELEMETRY_ENABLED=false \
             --env NO_AT_BRIDGE=0 \
-            -- ${lib.getExe self'.packages.cua-driver} mcp
+            -- ${lib.getExe inputs.cua.packages.${pkgs.stdenv.hostPlatform.system}.cua-driver} mcp
       '';
     };
 }
