@@ -3,10 +3,21 @@
     ({ user, host, ... }: {
       name = "docker(${user.userName}@${host.name})";
 
-      nixos = {
-        virtualisation.docker.enable = true;
-        users.users.${user.userName}.extraGroups = [ "docker" ];
-      };
+      nixos =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        {
+          virtualisation.docker = {
+            enable = true;
+            daemon.settings."firewall-backend" = lib.mkIf config.networking.nftables.enable "nftables";
+            extraPackages = lib.optionals config.networking.nftables.enable [ pkgs.nftables ];
+          };
+          users.users.${user.userName}.extraGroups = [ "docker" ];
+        };
     })
   ];
 }

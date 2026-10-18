@@ -4,9 +4,11 @@
   lib,
   nftables,
   openresolv,
+  procps,
   python3Packages,
   runCommand,
   systemd,
+  util-linux,
   wireguard-tools,
 }:
 let
@@ -24,6 +26,12 @@ let
     ln -s ${wireguard-tools}/bin/wg $out/bin/wg
     cp ${wireguard-tools}/bin/.wg-quick-wrapped $out/bin/wg-quick
     sed -i '/^[[:space:]]*\[\[ \$UID == 0 \]\] || exec sudo /c\    :' $out/bin/wg-quick
+    # Run after Tailscale's 52xx rules and before the main table's 32766 rule.
+    substituteInPlace $out/bin/wg-quick \
+      --replace-fail 'rule add not fwmark $table table $table' \
+        'rule add priority 32765 not fwmark $table table $table' \
+      --replace-fail 'rule add table main suppress_prefixlength 0' \
+        'rule add priority 32764 table main suppress_prefixlength 0'
     chmod +x $out/bin/wg-quick
   '';
 in
@@ -64,8 +72,16 @@ python3Packages.buildPythonApplication {
     }"
   ];
 
-  nativeCheckInputs = [ python3Packages.pytestCheckHook ];
+  nativeCheckInputs = [
+    python3Packages.pytestCheckHook
+    iproute2
+    nftables
+    procps
+    util-linux
+    wireguardRuntime
+  ];
   pythonImportsCheck = [ "pia_vpn" ];
+  passthru.wireguardRuntime = wireguardRuntime;
 
   meta = {
     description = "Private Internet Access WireGuard controller and CLI";

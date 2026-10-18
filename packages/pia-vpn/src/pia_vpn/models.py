@@ -30,6 +30,9 @@ class Config(StrictModel):
     kill_switch: bool = True
     allow_lan: bool = True
     interface: str = "pia"
+    tailscale_interface: str | None = Field(
+        default=None, pattern=_NAME.pattern, max_length=15
+    )
     runtime_dir: Path = Path("/run/pia-wireguard")
     state_dir: Path = Path("/var/lib/pia-wireguard")
     socket_group: str | None = None

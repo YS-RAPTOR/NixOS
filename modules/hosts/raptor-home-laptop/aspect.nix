@@ -5,6 +5,8 @@
       den.aspects.system.locale
       den.aspects.system.boot.efi-grub
       den.aspects.services.networking.networkmanager
+      den.aspects.services.networking.nftables
+      den.aspects.services.networking.tailscale
       (den.batteries.services.networking.pia {
         region = "nz";
         autoStart = true;

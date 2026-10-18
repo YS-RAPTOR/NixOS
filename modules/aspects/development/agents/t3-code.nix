@@ -25,6 +25,7 @@
         codex
         claude
       ];
+      home.sessionVariables.T3CODE_TELEMETRY_ENABLED = "false";
       programs.t3code = {
         enable = true;
         package = self'.packages.t3-code;

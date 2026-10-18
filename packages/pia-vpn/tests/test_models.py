@@ -11,6 +11,14 @@ def test_config_forbids_unknown_policy() -> None:
         Config(default_region="nz", surprise=True)  # type: ignore[call-arg]
 
 
+@pytest.mark.parametrize(
+    "interface", ["", "tailscale0; accept", "tailscale0\n", "a" * 16]
+)
+def test_config_rejects_unsafe_tailscale_interface(interface: str) -> None:
+    with pytest.raises(ValidationError):
+        Config(default_region="nz", tailscale_interface=interface)
+
+
 def test_server_list_ignores_unneeded_pia_fields() -> None:
     servers = ServerList.model_validate(
         {

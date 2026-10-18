@@ -126,28 +126,21 @@ Endpoint = {registration.server_ip}:{registration.server_port}
     def protect(self, endpoint: tuple[str, int] | None = None) -> None:
         if not self.config.kill_switch:
             return
-        exists = (
-            self.runner.run(
-                ["nft", "list", "table", "inet", "pia_vpn"],
-                check=False,
-                timeout=self.config.command_timeout,
-            ).returncode
-            == 0
-        )
         element = f"{endpoint[0]} . {endpoint[1]}" if endpoint else ""
-        if exists:
-            commands = ["flush set inet pia_vpn endpoints"]
-            if element:
-                commands.append(f"add element inet pia_vpn endpoints {{ {element} }}")
-            self._nft("\n".join(commands))
-            return
-
         lan = ""
         if self.config.allow_lan:
             lan = """ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 } accept
     ip6 daddr fe80::/10 accept"""
+        tailscale = ""
+        if self.config.tailscale_interface is not None:
+            # Allow overlay traffic and tailscaled's marked transport/control sockets.
+            tailscale = f"""oifname "{self.config.tailscale_interface}" accept
+    meta mark & 0xff0000 == 0x80000 accept"""
         initial = f"elements = {{ {element} }}" if element else ""
-        self._nft(f"""table inet pia_vpn {{
+        # Replace only our table atomically so policy changes apply to existing rules.
+        self._nft(f"""table inet pia_vpn
+delete table inet pia_vpn
+table inet pia_vpn {{
   set endpoints {{ type ipv4_addr . inet_service; {initial} }}
   chain output {{
     type filter hook output priority -150; policy accept;
@@ -157,6 +150,7 @@ Endpoint = {registration.server_ip}:{registration.server_port}
     meta skuid {os.geteuid()} accept
     ip daddr . udp dport @endpoints accept
     oifname "{self.config.interface}" accept
+    {tailscale}
     {lan}
     reject
   }}

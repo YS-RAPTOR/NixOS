@@ -10,6 +10,7 @@
 
       includes = [
         den.aspects.services.networking.networkmanager
+        den.aspects.services.networking.nftables
         (
           { host, ... }:
           let
@@ -20,6 +21,7 @@
 
             nixos =
               {
+                config,
                 lib,
                 pkgs,
                 self',
@@ -38,6 +40,7 @@
                   default_region = region;
                   auto_start = autoStart;
                   kill_switch = killSwitch;
+                  tailscale_interface = if config.services.tailscale.enable then config.services.tailscale.interfaceName else null;
                   socket_group = controlGroup;
                   credential_path = credentialPath;
                   controller_unit = "pia-wireguard.service";
@@ -51,7 +54,7 @@
                 };
                 cleanup = pkgs.writeShellScript "pia-wireguard-cleanup" ''
                   if [ "''${SERVICE_RESULT:-}" = success ]; then
-                    ${lib.getExe' pkgs.wireguard-tools "wg-quick"} down /run/${runtimeDirectory}/pia.conf || true
+                    ${lib.getExe' package.wireguardRuntime "wg-quick"} down /run/${runtimeDirectory}/pia.conf || true
                     ${lib.getExe pkgs.nftables} delete table inet pia_vpn || true
                     rm -f /run/${runtimeDirectory}/pia.conf
                   fi
@@ -65,6 +68,9 @@
                   resolvconf.enable = true;
                   firewall.checkReversePath = "loose";
                 };
+
+                # Keep PIA's openresolv DNS configuration in control when both VPNs run.
+                services.tailscale.extraSetFlags = lib.mkIf config.services.tailscale.enable [ "--accept-dns=false" ];
 
                 users = {
                   groups.${serviceUser} = { };
