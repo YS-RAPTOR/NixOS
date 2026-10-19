@@ -7,7 +7,6 @@
 
   flake-file.inputs = {
     den.url = lib.mkDefault "github:denful/den";
-    flake-file.url = lib.mkDefault "github:vic/flake-file";
     pkgs-by-name-for-flake-parts.url = "github:drupol/pkgs-by-name-for-flake-parts";
   };
 
