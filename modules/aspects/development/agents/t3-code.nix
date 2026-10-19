@@ -50,7 +50,7 @@
         # Merge only our settings; keep T3's other user/provider settings mutable.
         mutableUserSettings = true;
         userSettings = {
-          worktreesDirectory = "${config.home.homeDirectory}/Dev/worktrees";
+          worktreesDirectory = "${config.home.homeDirectory}/Dev/.worktrees";
           providerInstances = {
             codex = {
               driver = "codex";
