@@ -77,7 +77,9 @@
 
         programs.waybar = {
           enable = true;
-          package = inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.default;
+          package = inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.default.override (old: {
+            waybar = old.waybar.override { runTests = false; };
+          });
           systemd.enable = true;
 
           settings.mainBar = {
