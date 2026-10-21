@@ -9,14 +9,17 @@
     }:
     let
       withDirenv =
-        name: executable:
+        name: command:
         pkgs.writeShellScriptBin name ''
-          exec ${lib.getExe pkgs.direnv} exec "$PWD" ${lib.escapeShellArg executable} "$@"
+          exec ${lib.getExe pkgs.direnv} exec "$PWD" ${lib.escapeShellArgs command} "$@"
         '';
-      codex = withDirenv "t3-codex-direnv" (lib.getExe pkgs.codex);
-      claude = withDirenv "t3-claude-direnv" (lib.getExe self'.packages.claude-code);
-      # T3's "Open in Neovim" runs `t3-neovim --goto PATH:LINE[:COLUMN]` or `t3-neovim PATH`.
-      # `+new-window` has the running Ghostty open the window, outside T3's sandbox.
+      codex = withDirenv "t3-codex-direnv" [ (lib.getExe pkgs.codex) ];
+      claude = withDirenv "t3-claude-direnv" [
+        (lib.getExe' pkgs.coreutils "env")
+        "-u"
+        "ANTHROPIC_API_KEY"
+        (lib.getExe self'.packages.claude-code)
+      ];
       neovim = pkgs.writeShellApplication {
         name = "t3-neovim";
         text = ''
