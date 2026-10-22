@@ -1,18 +1,18 @@
 { inputs, ... }: {
   den.aspects.development.agents.claude-code.homeManager =
     {
+      config,
       lib,
       pkgs,
       self',
       ...
     }:
     {
-      home.file = {
-        ".claude/CLAUDE.md".source = ./_files/AGENTS.md;
-      }
-      // import ./_lib/skill-links.nix {
-        inherit lib;
-        destination = ".claude/skills";
+      home.file.".claude/CLAUDE.md".source = ./_files/AGENTS.md;
+
+      home.activation.claudeSkills = import ./_lib/skill-copies.nix {
+        inherit lib pkgs;
+        destination = "${config.home.homeDirectory}/.claude/skills";
       };
 
       programs.claude-code = {
