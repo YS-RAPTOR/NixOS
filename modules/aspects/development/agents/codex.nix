@@ -9,11 +9,12 @@
     {
       home.packages = [ pkgs.codex ];
 
-      home.file.".codex/AGENTS.md".source = ./_files/AGENTS.md;
-
-      home.activation.codexSkills = import ./_lib/skill-copies.nix {
-        inherit lib pkgs;
-        destination = "${config.home.homeDirectory}/.agents/skills";
+      home.file = {
+        ".codex/AGENTS.md".source = ./_files/AGENTS.md;
+      }
+      // import ./_lib/skill-links.nix {
+        inherit lib;
+        destination = ".agents/skills";
       };
 
       # Codex owns a mutable config.toml (projects, marketplace state, etc.).
