@@ -78,7 +78,10 @@
         programs.waybar = {
           enable = true;
           package = inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.default.override (old: {
-            waybar = old.waybar.override { runTests = false; };
+            waybar = old.waybar.override {
+              runTests = false;
+              cavaSupport = false;
+            };
           });
           systemd.enable = true;
 
