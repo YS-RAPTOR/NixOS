@@ -44,6 +44,7 @@
     den.aspects.development.toolchains.c-cpp
     den.aspects.development.toolchains.dotnet
     den.aspects.development.toolchains.go
+    den.aspects.development.toolchains.jai
     den.aspects.development.toolchains.java
     den.aspects.development.toolchains.javascript
     den.aspects.development.toolchains.python
