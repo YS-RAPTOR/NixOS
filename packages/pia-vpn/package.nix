@@ -61,15 +61,16 @@ python3Packages.buildPythonApplication {
   '';
 
   makeWrapperArgs = [
-    "--prefix PATH : ${
-      lib.makeBinPath [
-        iproute2
-        nftables
-        openresolv
-        systemd
-        wireguardRuntime
-      ]
-    }"
+    "--prefix"
+    "PATH"
+    ":"
+    (lib.makeBinPath [
+      iproute2
+      nftables
+      openresolv
+      systemd
+      wireguardRuntime
+    ])
   ];
 
   nativeCheckInputs = [

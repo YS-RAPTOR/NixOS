@@ -1,7 +1,7 @@
 local M = {
     max_managed = 3,
     preferred = "eDP-1",
-    prefixes = { "", "A-", "C-" },
+    prefixes = { "N-", "A-", "C-" },
     scrolling_count = 3,
     workspace_count = 5,
 }
@@ -117,6 +117,9 @@ local function apply_workspace_ownership()
     for monitor_index = 1, M.max_managed do
         local monitor = monitors[monitor_index]
         local desired_monitor = monitor and monitor.name or nil
+        if #monitors == 0 and monitor_index == 1 then
+            desired_monitor = M.preferred
+        end
 
         for key = 1, M.workspace_count do
             local name = M.workspace_name(monitor_index, key)

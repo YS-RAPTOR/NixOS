@@ -119,9 +119,12 @@ Endpoint = {registration.server_ip}:{registration.server_port}
             timestamp = int(values[-1])
         except ValueError:
             return None
-        if timestamp <= 0:
+        age = time.time() - timestamp
+        # A future handshake means the clock stepped back. WireGuard peers reject
+        # handshakes older than the last one, so this tunnel can no longer rekey.
+        if timestamp <= 0 or age < 0:
             return float("inf")
-        return max(0, time.time() - timestamp)
+        return age
 
     def protect(self, endpoint: tuple[str, int] | None = None) -> None:
         if not self.config.kill_switch:

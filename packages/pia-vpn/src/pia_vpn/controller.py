@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import grp
 import logging
 import os
@@ -30,6 +31,30 @@ from .system import SystemNetwork
 
 _LOG = logging.getLogger("pia-vpn-controller")
 
+# Far enough ahead that the clock timer never expires; only clock steps wake it.
+_CLOCK_HORIZON = 10 * 365 * 24 * 3600
+
+
+def _watch_clock(fd: int) -> None:
+    """Arm a timerfd to become readable when the wall clock is stepped."""
+    os.timerfd_settime(
+        fd,
+        flags=os.TFD_TIMER_ABSTIME | os.TFD_TIMER_CANCEL_ON_SET,
+        initial=time.time() + _CLOCK_HORIZON,
+    )
+
+
+async def _first_set(*events: asyncio.Event, timeout: float) -> None:
+    """Wait until any of the events is set or the timeout passes."""
+    waiters = [asyncio.create_task(event.wait()) for event in events]
+    try:
+        await asyncio.wait(
+            waiters, timeout=timeout, return_when=asyncio.FIRST_COMPLETED
+        )
+    finally:
+        for waiter in waiters:
+            waiter.cancel()
+
 
 class Controller:
     def __init__(self, config: Config) -> None:
@@ -49,6 +74,7 @@ class Controller:
         self.pia = PiaClient(ca, config.command_timeout)
         self.desired = config.auto_start
         self.changed = asyncio.Event()
+        self.clock_stepped = asyncio.Event()
         self.stopping = asyncio.Event()
         self.lifecycle = asyncio.Lock()
         self.status = self._status(
@@ -104,10 +130,20 @@ class Controller:
                 grp.getgrnam(self.config.socket_group).gr_gid,
             )
 
+        # Recheck tunnel health as soon as NTP, a manual set or resume steps the clock.
+        loop = asyncio.get_running_loop()
+        clock = os.timerfd_create(
+            time.CLOCK_REALTIME, flags=os.TFD_NONBLOCK | os.TFD_CLOEXEC
+        )
+        _watch_clock(clock)
+        loop.add_reader(clock, self._on_clock_step, clock)
+
         worker = asyncio.create_task(self.run(), name="pia-vpn-worker")
         await self.stopping.wait()
         worker.cancel()
         await asyncio.gather(worker, return_exceptions=True)
+        loop.remove_reader(clock)
+        os.close(clock)
         await runner.cleanup()
         self.config.socket_path.unlink(missing_ok=True)
 
@@ -263,17 +299,23 @@ class Controller:
 
     async def _monitor(self) -> None:
         while self.desired:
-            try:
-                await asyncio.wait_for(
-                    self.changed.wait(), timeout=self.config.health_interval
-                )
+            self.clock_stepped.clear()
+            await _first_set(
+                self.changed, self.clock_stepped, timeout=self.config.health_interval
+            )
+            if self.changed.is_set():
                 return
-            except TimeoutError:
-                pass
             age = await asyncio.to_thread(self.network.handshake_age)
             if age is None or age > self.config.handshake_max_age:
                 raise PiaVpnError("WireGuard handshake is stale", "unhealthy_tunnel")
             self._publish(self.status.model_copy(update={"handshake_age": age}))
+
+    def _on_clock_step(self, fd: int) -> None:
+        # Reads fail with ECANCELED after a step; re-arm for the next one.
+        with contextlib.suppress(OSError):
+            os.read(fd, 8)
+        _watch_clock(fd)
+        self.clock_stepped.set()
 
     async def _disconnect(self, *, unprotect: bool) -> None:
         async with self.lifecycle:

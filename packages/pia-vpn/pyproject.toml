@@ -6,7 +6,7 @@ build-backend = "uv_build"
 name = "pia-vpn"
 version = "0.1.0"
 description = "Private Internet Access WireGuard controller and CLI"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 license = "MIT"
 dependencies = [
   "aiohttp>=3.14.3,<4",

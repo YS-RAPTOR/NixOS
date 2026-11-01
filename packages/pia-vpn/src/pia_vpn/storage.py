@@ -4,16 +4,14 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
 from .errors import PiaVpnError
 
-M = TypeVar("M", bound=BaseModel)
 
-
-def read_model(path: Path, model: type[M], default: M | None = None) -> M:
+def read_model[M: BaseModel](path: Path, model: type[M], default: M | None = None) -> M:
     try:
         data = path.read_bytes()
     except FileNotFoundError:

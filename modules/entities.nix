@@ -20,7 +20,7 @@
         {
           argv = [ "vivaldi" ];
           workspaceByMonitorCount = {
-            "1" = "3";
+            "1" = "N-3";
             "2" = "A-1";
             "3" = "C-1";
           };
@@ -28,7 +28,7 @@
         {
           argv = [ "slack" ];
           workspaceByMonitorCount = {
-            "1" = "3";
+            "1" = "N-3";
             "2" = "A-2";
             "3" = "C-2";
           };
@@ -36,7 +36,7 @@
         {
           argv = [ "teams-for-linux" ];
           workspaceByMonitorCount = {
-            "1" = "3";
+            "1" = "N-3";
             "2" = "A-3";
             "3" = "C-3";
           };
