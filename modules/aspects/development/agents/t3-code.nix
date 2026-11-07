@@ -23,6 +23,15 @@
       neovim = pkgs.writeShellApplication {
         name = "t3-neovim";
         text = ''
+          if [[ $1 =~ ^t3-neovim://vscode-remote/ssh-remote\+([^/]+)(/.*)$ ]]; then
+            printf -v host '%b' "''${BASH_REMATCH[1]//%/\\x}"
+            printf -v path '%b' "''${BASH_REMATCH[2]//%/\\x}"
+            dir=$path
+            [[ $path == *:1:1 ]] && path=''${path%:1:1} dir=''${path%/*}
+            exec ${lib.getExe config.programs.ghostty.package} +new-window \
+              -e ssh -t -- "$host" "cd ''${dir@Q} && exec nvim -- ''${path@Q}"
+          fi
+
           target=$1
           position=()
           if [[ $1 == --goto && $2 =~ :([0-9]+)(:([0-9]+))?$ ]]; then
@@ -47,6 +56,12 @@
         neovim
       ];
       home.sessionVariables.T3CODE_TELEMETRY_ENABLED = "false";
+      xdg.desktopEntries.t3-neovim = {
+        name = "Neovim (T3 remote)";
+        exec = "${lib.getExe neovim} %u";
+        noDisplay = true;
+        mimeType = [ "x-scheme-handler/t3-neovim" ];
+      };
       programs.t3code = {
         enable = true;
         package = self'.packages.t3-code;

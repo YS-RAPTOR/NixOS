@@ -1,4 +1,4 @@
-// Patch T3's packaged app: give Codex the thread cwd, and add a Neovim "Open in" editor.
+// Patch T3's packaged app: give Codex the thread cwd, and add a Neovim "Open in" editor for local and remote threads.
 // Each edit is anchored on text that must occur exactly once, so a changed release fails the build.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -55,12 +55,20 @@ edit(serverWith("Codex launcher", codexLaunch), codexLaunch, (launch) => launch.
   "\t\t\t...(input.runtimePolicy.cwd == null ? {} : { cwd: input.runtimePolicy.cwd }),\n\t\t\tenv: environment,",
 ));
 
-// Add a Neovim editor that runs `t3-neovim` from PATH; the server and web client each bundle the editor list.
-const neovim = JSON.stringify({ id: "neovim", label: "Neovim", commands: ["t3-neovim"], launchStyle: "goto" });
+// Add a Neovim editor that runs `t3-neovim` from PATH; the server, web client and desktop each bundle the editor list.
+// Its remoteScheme lets remote threads open `t3-neovim://vscode-remote/ssh-remote+<dest><path>`, which `t3-neovim` handles;
+// the desktop's copy of the list decides which remote schemes it will open.
+const neovim = JSON.stringify({
+  id: "neovim", label: "Neovim", commands: ["t3-neovim"], launchStyle: "goto", remoteScheme: "t3-neovim",
+});
 const serverFileManager = '\t{\n\t\tid: "file-manager",';
 edit(serverWith("Server editor list", serverFileManager), serverFileManager, (entry) => `${neovim},\n${entry}`);
 const fileManager = "{id:`file-manager`,label:`File Manager`,commands:null,launchStyle:`direct-path`}";
 edit(one("Client editor list", assets.filter((path) => read(path).includes(fileManager))), fileManager, (entry) => `${neovim},${entry}`);
+const desktopFileManager = '\t\t{\n\t\t\tid: "file-manager",';
+const desktopChunks = archived.filter((path) => /^apps\/desktop\/dist-electron\/[^/]+\.cjs$/.test(path));
+const desktopList = one("Desktop editor list", desktopChunks.filter((path) => read(path).includes(desktopFileManager)));
+edit(desktopList, desktopFileManager, (entry) => `${neovim},\n${entry}`);
 
 // Neovim's logo in flat colors (gradients would need unique SVG ids), built with the chunk's own JSX runtime.
 const neovimIconPaths = [
