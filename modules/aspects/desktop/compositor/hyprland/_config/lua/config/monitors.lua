@@ -1,3 +1,5 @@
+local hdr_outputs = require("runtime").hdr_outputs
+
 local M = {
     max_managed = 3,
     preferred = "eDP-1",
@@ -9,11 +11,11 @@ local M = {
 local ownership = {}
 local ownership_monitor = {}
 local monitor_rules = {}
-local monitor_scales = {}
+local monitor_rule_keys = {}
 
 hl.monitor({
     output = "",
-    mode = "preferred",
+    mode = "highres",
     position = "auto-up",
     scale = 1,
 })
@@ -58,25 +60,46 @@ local function scale_for(monitor)
     return monitor.height > 1440 and 1.6 or 1
 end
 
-local function apply_monitor_scales(monitors)
+local function backlight_nits(backlight)
+    local file = io.open("/sys/class/backlight/" .. backlight .. "/brightness")
+    if not file then
+        return nil
+    end
+
+    local nits = file:read("n")
+    file:close()
+    return nits and math.max(nits, 5)
+end
+
+local function rule_for(monitor)
+    local hdr = hdr_outputs[monitor.name]
+    return {
+        output = monitor.name,
+        mode = "highres",
+        position = "auto-up",
+        scale = scale_for(monitor),
+        bitdepth = hdr and 10 or 8,
+        cm = hdr and "hdr" or "srgb",
+        sdr_min_luminance = hdr and 0 or nil,
+        reference_luminance = hdr and backlight_nits(hdr.backlight) or nil,
+    }
+end
+
+local function apply_monitor_rules(monitors)
     local connected = {}
 
     for _, monitor in ipairs(monitors) do
-        local scale = scale_for(monitor)
+        local rule = rule_for(monitor)
+        local key = rule.scale .. "/" .. tostring(rule.reference_luminance)
         connected[monitor.name] = true
 
-        if monitor_scales[monitor.name] ~= scale then
+        if monitor_rule_keys[monitor.name] ~= key then
             if monitor_rules[monitor.name] then
                 monitor_rules[monitor.name]:set_enabled(false)
             end
 
-            monitor_rules[monitor.name] = hl.monitor({
-                output = monitor.name,
-                mode = "preferred",
-                position = "auto-up",
-                scale = scale,
-            })
-            monitor_scales[monitor.name] = scale
+            monitor_rules[monitor.name] = hl.monitor(rule)
+            monitor_rule_keys[monitor.name] = key
         end
     end
 
@@ -84,7 +107,7 @@ local function apply_monitor_scales(monitors)
         if not connected[name] then
             rule:set_enabled(false)
             monitor_rules[name] = nil
-            monitor_scales[name] = nil
+            monitor_rule_keys[name] = nil
         end
     end
 end
@@ -112,7 +135,7 @@ end
 
 local function apply_workspace_ownership()
     local monitors = M.ordered()
-    apply_monitor_scales(monitors)
+    apply_monitor_rules(monitors)
 
     for monitor_index = 1, M.max_managed do
         local monitor = monitors[monitor_index]
@@ -165,6 +188,32 @@ end)
 hl.on("monitor.added", schedule_topology_update)
 hl.on("monitor.removed", schedule_topology_update)
 hl.on("monitor.layout_changed", schedule_topology_update)
+
+local backlight_timer
+
+local function start_backlight_timer()
+    if backlight_timer then
+        return
+    end
+
+    backlight_timer = hl.timer(function()
+        apply_monitor_rules(copy_monitors())
+    end, { timeout = 150, type = "repeat" })
+end
+
+if next(hdr_outputs) then
+    hl.config({
+        render = {
+            cm_auto_hdr = 0,
+            cm_sdr_eotf = "gamma22force",
+        },
+    })
+
+    hl.on("hyprland.start", start_backlight_timer)
+    if #hl.get_monitors() > 0 then
+        start_backlight_timer()
+    end
+end
 
 apply_workspace_ownership()
 

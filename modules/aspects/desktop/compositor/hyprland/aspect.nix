@@ -6,11 +6,16 @@
     ({ user, host, ... }: {
       name = "hyprland(${user.userName}@${host.name})";
 
-      nixos = { pkgs, ... }: {
+      nixos = { lib, pkgs, ... }: {
         programs.hyprland = {
           enable = true;
           withUWSM = true;
           xwayland.enable = true;
+          package = lib.mkIf (host.hdrOutputs != { }) (
+            pkgs.hyprland.overrideAttrs (old: {
+              patches = (old.patches or [ ]) ++ [ ./_patches/reference-luminance.patch ];
+            })
+          );
         };
 
         xdg.portal = {
@@ -45,6 +50,7 @@
               lib.generators.toLua { } {
                 browser = config.desktop.commands.browser;
                 file_manager = config.desktop.commands.fileManager;
+                hdr_outputs = host.hdrOutputs;
                 hyprshot = lib.getExe pkgs.hyprshot;
                 keyboard_layout = host.keyboardLayout;
                 launcher = config.desktop.commands.launcher;

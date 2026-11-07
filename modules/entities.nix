@@ -1,5 +1,6 @@
 {
   den.hosts.x86_64-linux.raptor-home-laptop = {
+    hdrOutputs."eDP-1".backlight = "intel_backlight";
     users.raptor = {
       git = {
         name = "YS-RAPTOR";

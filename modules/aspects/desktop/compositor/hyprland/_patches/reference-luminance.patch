@@ -1,0 +1,133 @@
+diff -ruN a/src/config/lua/bindings/LuaBindingsConfigRules.cpp b/src/config/lua/bindings/LuaBindingsConfigRules.cpp
+--- a/src/config/lua/bindings/LuaBindingsConfigRules.cpp	2026-11-07 13:04:11.086155045 +1100
++++ b/src/config/lua/bindings/LuaBindingsConfigRules.cpp	2026-11-07 13:04:11.113226196 +1100
+@@ -175,6 +175,11 @@
+              p.rule().m_maxAvgLuminance = sc<int>(*sc<const Config::INTEGER*>(v->data()));
+              return true;
+          }},
++        {"reference_luminance", []() -> ILuaConfigValue* { return new CLuaConfigInt(-1); },
++         [](ILuaConfigValue* v, CMonitorRuleParser& p) {
++             p.rule().m_referenceLuminance = sc<int>(*sc<const Config::INTEGER*>(v->data()));
++             return true;
++         }},
+     };
+ 
+     static_assert(sizeof(Internal::WINDOW_RULE_EFFECT_DESCS) / sizeof(Internal::SWindowRuleEffectDesc) == Internal::WE::WINDOW_RULE_EFFECT_LAST_STATIC - 1);
+diff -ruN a/src/config/shared/monitor/MonitorRule.cpp b/src/config/shared/monitor/MonitorRule.cpp
+--- a/src/config/shared/monitor/MonitorRule.cpp	2026-11-07 13:04:11.081806062 +1100
++++ b/src/config/shared/monitor/MonitorRule.cpp	2026-11-07 13:04:11.113357762 +1100
+@@ -20,7 +20,7 @@
+     const auto SAME_CM = other.m_cmType == m_cmType && other.m_sdrSaturation == m_sdrSaturation && other.m_sdrBrightness == m_sdrBrightness &&
+         other.m_sdrMinLuminance == m_sdrMinLuminance && other.m_sdrMaxLuminance == m_sdrMaxLuminance && other.m_supportsWideColor == m_supportsWideColor &&
+         other.m_supportsHDR == m_supportsHDR && other.m_minLuminance == m_minLuminance && other.m_maxLuminance == m_maxLuminance && other.m_maxAvgLuminance == m_maxAvgLuminance &&
+-        other.m_iccFile == m_iccFile;
++        other.m_referenceLuminance == m_referenceLuminance && other.m_iccFile == m_iccFile;
+     const auto SAME_POS       = m_offset == other.m_offset;
+     const auto SAME_TRANSFORM = m_transform == other.m_transform;
+     const auto SAME_AUTO_DIR  = m_autoDir == other.m_autoDir;
+diff -ruN a/src/config/shared/monitor/MonitorRule.hpp b/src/config/shared/monitor/MonitorRule.hpp
+--- a/src/config/shared/monitor/MonitorRule.hpp	2026-11-07 13:04:11.077070332 +1100
++++ b/src/config/shared/monitor/MonitorRule.hpp	2026-11-07 13:04:11.113400137 +1100
+@@ -64,6 +64,7 @@
+         float              m_minLuminance    = -1.F; // >= 0 overrides EDID
+         int                m_maxLuminance    = -1;   // >= 0 overrides EDID
+         int                m_maxAvgLuminance = -1;   // >= 0 overrides EDID
++        int                m_referenceLuminance = -1; // > 0 sets SDR white for clients and SDR -> HDR mapping
+ 
+         drmModeModeInfo    m_drmMode = {};
+         std::optional<int> m_vrr;
+diff -ruN a/src/output/Monitor.cpp b/src/output/Monitor.cpp
+--- a/src/output/Monitor.cpp	2026-11-07 13:04:11.095290928 +1100
++++ b/src/output/Monitor.cpp	2026-11-07 13:04:11.113525282 +1100
+@@ -615,11 +615,13 @@
+         m_sdrEotf = m_activeMonitorRule.m_sdrEotf;
+ 
+         m_sdrMinLuminance = m_activeMonitorRule.m_sdrMinLuminance;
+-        m_sdrMaxLuminance = m_activeMonitorRule.m_sdrMaxLuminance;
++        m_sdrMaxLuminance = m_activeMonitorRule.m_referenceLuminance > 0 ? m_activeMonitorRule.m_referenceLuminance :
++                                                                            m_activeMonitorRule.m_sdrMaxLuminance;
+ 
+         m_minLuminance    = m_activeMonitorRule.m_minLuminance;
+         m_maxLuminance    = m_activeMonitorRule.m_maxLuminance;
+         m_maxAvgLuminance = m_activeMonitorRule.m_maxAvgLuminance;
++        m_referenceLuminance = m_activeMonitorRule.m_referenceLuminance;
+ 
+         applyCMType(m_cmType, m_sdrEotf);
+ 
+@@ -2416,7 +2418,7 @@
+         .masteringPrimaries  = masteringPrimaries,
+         .luminances          = {.min       = minLuminance() >= 0 ? minLuminance() : defaultHDR.getTFMinLuminance(),
+                                 .max       = maxLuminance() > 0 ? sc<uint32_t>(maxLuminance()) : sc<uint32_t>(defaultHDR.getTFMaxLuminance()),
+-                                .reference = sc<uint32_t>(defaultHDR.getTFRefLuminance())},
++                                .reference = m_referenceLuminance > 0 ? sc<uint32_t>(m_referenceLuminance) : sc<uint32_t>(defaultHDR.getTFRefLuminance())},
+         .masteringLuminances = getMasteringLuminances(),
+         .maxCLL              = maxCLL(),
+         .maxFALL             = maxFALL(),
+diff -ruN a/src/output/Monitor.hpp b/src/output/Monitor.hpp
+--- a/src/output/Monitor.hpp	2026-11-07 13:04:11.090686532 +1100
++++ b/src/output/Monitor.hpp	2026-11-07 13:04:11.113662623 +1100
+@@ -424,5 +424,6 @@
+         float m_minLuminance      = -1.0f;
+         int   m_maxLuminance      = -1;
+         int   m_maxAvgLuminance   = -1;
++        int   m_referenceLuminance = -1;
+     };
+ }
+diff -ruN a/src/render/OpenGL.cpp b/src/render/OpenGL.cpp
+--- a/src/render/OpenGL.cpp	2026-11-07 13:04:11.107881101 +1100
++++ b/src/render/OpenGL.cpp	2026-11-07 13:04:11.126536270 +1100
+@@ -1296,6 +1296,8 @@
+     shader->setUniformInt(SHADER_TONEMAP_MODE, settings.tonemapMode);
+     shader->setUniformFloat(SHADER_SDR_SATURATION, settings.sdrSaturation);
+     shader->setUniformFloat(SHADER_SDR_BRIGHTNESS, settings.sdrBrightnessMultiplier);
++    shader->setUniformFloat2(SHADER_MIRROR_TF_RANGE, sdrMinLuminance >= 0 ? sdrMinLuminance : SDR_MIN_LUMINANCE,
++                             sdrMaxLuminance > 0 ? sdrMaxLuminance : SDR_MAX_LUMINANCE);
+ 
+     if (!targetImageDescription->value().icc.present) {
+         const auto cacheKey = std::pair{imageDescription->id(), targetImageDescription->id()};
+diff -ruN a/src/render/Shader.cpp b/src/render/Shader.cpp
+--- a/src/render/Shader.cpp	2026-11-07 13:04:11.103839366 +1100
++++ b/src/render/Shader.cpp	2026-11-07 13:04:11.126316505 +1100
+@@ -140,6 +140,7 @@
+     m_uniformLocations[SHADER_DST_REF_LUMINANCE]    = getUniform("dstRefLuminance");
+     m_uniformLocations[SHADER_SDR_SATURATION]       = getUniform("sdrSaturation");
+     m_uniformLocations[SHADER_SDR_BRIGHTNESS]       = getUniform("sdrBrightnessMultiplier");
++    m_uniformLocations[SHADER_MIRROR_TF_RANGE]      = getUniform("mirrorTFRange");
+     m_uniformLocations[SHADER_CONVERT_MATRIX]       = getUniform("convertMatrix");
+     m_uniformLocations[SHADER_LUT_3D]               = getUniform("iccLut3D");
+     m_uniformLocations[SHADER_LUT_SIZE]             = getUniform("iccLutSize");
+diff -ruN a/src/render/Shader.hpp b/src/render/Shader.hpp
+--- a/src/render/Shader.hpp	2026-11-07 13:04:11.099930401 +1100
++++ b/src/render/Shader.hpp	2026-11-07 13:04:11.126161186 +1100
+@@ -19,6 +19,7 @@
+     SHADER_DST_REF_LUMINANCE,
+     SHADER_SDR_SATURATION,
+     SHADER_SDR_BRIGHTNESS,
++    SHADER_MIRROR_TF_RANGE,
+     SHADER_CONVERT_MATRIX,
+     SHADER_TEX,
+     SHADER_ALPHA,
+diff -ruN a/src/render/shaders/glsl/cm_helpers.glsl b/src/render/shaders/glsl/cm_helpers.glsl
+--- a/src/render/shaders/glsl/cm_helpers.glsl	2026-11-07 13:04:11.111744866 +1100
++++ b/src/render/shaders/glsl/cm_helpers.glsl	2026-11-07 13:04:11.126873978 +1100
+@@ -205,6 +205,11 @@
+ #endif
+ 
+ #if USE_MIRROR
++// SDR range screencopy maps every source into; the monitor's SDR white when set.
++uniform vec2 mirrorTFRange;
++#endif
++
++#if USE_MIRROR
+ vec4[2]
+ #else
+ vec4
+@@ -252,7 +257,7 @@
+ #if USE_MIRROR
+     // TODO HDR -> SDR tonemap
+     vec4 mirrorColor = fromLinearNit(pixColor, CM_TRANSFER_FUNCTION_SRGB,
+-                                     srcTF == CM_TRANSFER_FUNCTION_GAMMA22 || srcTF == CM_TRANSFER_FUNCTION_SRGB ? srcTFRange : vec2(SDR_MIN_LUMINANCE, SDR_MAX_LUMINANCE));
++                                     srcTF == CM_TRANSFER_FUNCTION_GAMMA22 || srcTF == CM_TRANSFER_FUNCTION_SRGB ? srcTFRange : (mirrorTFRange.y > 0.0 ? mirrorTFRange : vec2(SDR_MIN_LUMINANCE, SDR_MAX_LUMINANCE)));
+ #endif
+     pixColor = fromLinearNit(pixColor, dstTF, dstTFRange);
+ #if USE_SDR_MOD
