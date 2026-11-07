@@ -38,7 +38,9 @@ const edit = (path, anchor, replace) => {
   patched.add(path);
 };
 
-const server = one("Server bundle", archived.filter((path) => /^apps\/server\/dist\/binCli-[^/]+\.mjs$/.test(path)));
+const serverChunks = archived.filter((path) => /^apps\/server\/dist\/[^/]+\.mjs$/.test(path));
+/** Finds the server chunk holding `anchor`; releases move code between chunks. */
+const serverWith = (what, anchor) => one(what, serverChunks.filter((path) => read(path).includes(anchor)));
 const assets = archived.filter((path) => /^apps\/server\/dist\/client\/assets\/[^/]+\.js$/.test(path));
 
 // Give Codex's launcher the thread cwd so the configured direnv wrapper works.
@@ -48,14 +50,15 @@ const codexLaunch = `\t\tconst command = yield* makeCodexAppServerSpawnCommand({
 \t\t\tenv: environment,
 \t\t\tthreadId: input.threadId
 \t\t}).pipe(provideService(AgentScope, agentScope));`;
-edit(server, codexLaunch, (launch) => launch.replace(
+edit(serverWith("Codex launcher", codexLaunch), codexLaunch, (launch) => launch.replace(
   "\t\t\tenv: environment,",
   "\t\t\t...(input.runtimePolicy.cwd == null ? {} : { cwd: input.runtimePolicy.cwd }),\n\t\t\tenv: environment,",
 ));
 
 // Add a Neovim editor that runs `t3-neovim` from PATH; the server and web client each bundle the editor list.
 const neovim = JSON.stringify({ id: "neovim", label: "Neovim", commands: ["t3-neovim"], launchStyle: "goto" });
-edit(server, '\t{\n\t\tid: "file-manager",', (entry) => `${neovim},\n${entry}`);
+const serverFileManager = '\t{\n\t\tid: "file-manager",';
+edit(serverWith("Server editor list", serverFileManager), serverFileManager, (entry) => `${neovim},\n${entry}`);
 const fileManager = "{id:`file-manager`,label:`File Manager`,commands:null,launchStyle:`direct-path`}";
 edit(one("Client editor list", assets.filter((path) => read(path).includes(fileManager))), fileManager, (entry) => `${neovim},${entry}`);
 
