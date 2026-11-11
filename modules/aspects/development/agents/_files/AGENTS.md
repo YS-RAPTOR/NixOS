@@ -11,6 +11,7 @@ I wanted to share some of my preferences here so we can be more aligned.
 - Tests are good! Endless smoke tests, "regression tests" for feature deletion, etc., are much less good. Tests should be focused, not slop.
 - Comments are a great way to clarify functionality and how code is used. Don't comment every line, but feel free to describe (concisely) how functions, classes, etc. are used.
 - Keep comments up to date. When making changes, it is important to keep things in sync.
+- I am not a big fan of commit descriptions. Make sure to not add them. Also never add `Co-Authored-By` trailer!
 
 ## TypeScript
 
