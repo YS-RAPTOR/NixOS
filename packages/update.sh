@@ -75,6 +75,39 @@ update_github_release() {
     mv "$temporary" "$sources"
 }
 
+# npm dist-tags select the version; optional URLs package a separately published runtime.
+update_npm() {
+    local package="$1" config="$2" sources="$3"
+    local package_name tag encoded_name encoded_tag manifest version url hash temporary
+
+    package_name="$(jq --exit-status --raw-output '.package | select(type == "string" and length > 0)' "$config")"
+    tag="$(jq --exit-status --raw-output '.tag // "latest" | select(type == "string" and length > 0)' "$config")"
+    encoded_name="$(jq --null-input --raw-output --arg name "$package_name" '$name | @uri')"
+    encoded_tag="$(jq --null-input --raw-output --arg tag "$tag" '$tag | @uri')"
+    manifest="$(curl -fsSL "https://registry.npmjs.org/$encoded_name/$encoded_tag")"
+    version="$(jq --exit-status --raw-output '.version | select(type == "string" and length > 0)' <<<"$manifest")"
+
+    if jq --exit-status 'has("urls")' "$config" >/dev/null; then
+        url="$(jq --exit-status --raw-output --arg system "$current_system" '.urls[$system] | select(type == "string" and startswith("https://"))' "$config")"
+        url="${url//\{version\}/$version}"
+        hash="$(nix store prefetch-file --json "$url" | jq --exit-status --raw-output .hash)"
+    else
+        url="$(jq --exit-status --raw-output '.dist.tarball | select(type == "string" and startswith("https://"))' <<<"$manifest")"
+        hash="$(jq --exit-status --raw-output '.dist.integrity | select(type == "string" and length > 0)' <<<"$manifest")"
+    fi
+
+    temporary="$(mktemp "$sources.XXXXXX")"
+    if ! jq --indent 4 \
+        --arg system "$current_system" --arg version "$version" --arg url "$url" --arg hash "$hash" \
+        '.platforms[$system] = { version: $version, url: $url, hash: $hash }' \
+        "$sources" >"$temporary"; then
+        rm -f "$temporary"
+        return 1
+    fi
+    mv "$temporary" "$sources"
+    echo "Updated $package from $package_name@$tag ($version)"
+}
+
 update_package() {
     local package="$1" config="$root/packages/$1/update.json" sources="$root/packages/$1/sources.json"
     if [[ ! -f $config || ! -f $sources ]]; then
@@ -83,6 +116,7 @@ update_package() {
     fi
     case "$(jq --raw-output '.type // empty' "$config")" in
     github-release) update_github_release "$package" "$config" "$sources" ;;
+    npm) update_npm "$package" "$config" "$sources" ;;
     *)
         echo "Unsupported update type for: $package" >&2
         return 1

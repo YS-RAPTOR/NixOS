@@ -13,7 +13,6 @@
     den.aspects.services.credentials
     den.aspects.services.storage.removable-media
     den.aspects.services.networking.openvpn
-    den.aspects.development.computer-use.cua-driver
     den.aspects.appearance.theme.stylix
     den.aspects.desktop.compositor.hyprland
     den.aspects.appearance.wallpaper.hyprpaper
@@ -53,6 +52,7 @@
     den.aspects.development.tools.android
     den.aspects.development.agents.claude-code
     den.aspects.development.agents.codex
+    den.aspects.development.mcp
     den.aspects.development.agents.opencode.desktop
     den.aspects.development.agents.t3-code
     den.aspects.development.agents.opencode

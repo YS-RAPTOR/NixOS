@@ -1,0 +1,9 @@
+{
+    "platforms": {
+        "x86_64-linux": {
+            "version": "2.0.0-beta.44",
+            "url": "https://github.com/UsefulSoftwareCo/executor/releases/download/executor@2.0.0-beta.44/executor-2.0.0-beta.44-linux-x64.tgz",
+            "hash": "sha256-Z+JzrHuicDkm//o90hQGv7dLgBzwxxhECD2u7L1XbCk="
+        }
+    }
+}
