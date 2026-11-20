@@ -1,4 +1,4 @@
-{ den, inputs, ... }: {
+{ den, ... }: {
   den.aspects.desktop.shell.panel.waybar = {
     includes = [
       den.aspects.desktop.compositor.hyprland
@@ -77,12 +77,6 @@
 
         programs.waybar = {
           enable = true;
-          package = inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.default.override (old: {
-            waybar = old.waybar.override {
-              runTests = false;
-              cavaSupport = false;
-            };
-          });
           systemd.enable = true;
 
           settings.mainBar = {
