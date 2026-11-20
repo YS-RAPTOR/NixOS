@@ -150,7 +150,10 @@
                     ProtectKernelModules = true;
                     ProtectKernelTunables = false;
                     ProtectSystem = "strict";
-                    ReadWritePaths = [ "-/run/resolvconf" ];
+                    ReadWritePaths = [
+                      "-/run/resolvconf"
+                      "-/etc/resolv.conf"
+                    ];
                     RestrictAddressFamilies = [
                       "AF_INET"
                       "AF_NETLINK"
